@@ -1,18 +1,25 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import * as tc from '@actions/tool-cache'
+import {download} from './download'
+import {getLatestVersion} from './getLatestVersion'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    core.setFailed(error.message)
+    const version =
+      core.getInput('version') ||
+      (await core.group('Get latest version from github release', async () => {
+        const latestVersion = await getLatestVersion(core.getInput('token'))
+        core.info(`Using version: ${latestVersion}`)
+        return latestVersion
+      }))
+    const cache =
+      tc.find('talenta', version) ||
+      (await core.group('Cache not found, downloading', async () =>
+        download(version)
+      ))
+    core.addPath(cache)
+  } catch (e) {
+    core.setFailed(e)
   }
 }
 

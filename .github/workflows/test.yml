@@ -2,23 +2,20 @@ name: 'build-test'
 on: # rebuild any PRs and main branch changes
   pull_request:
   push:
-    branches:
-      - main
-      - 'releases/*'
+    branches: [ main ]
 
 jobs:
   build: # make sure build/ci work properly
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - run: |
-          npm install
-      - run: |
-          npm run all
+      - run: npm install
+      - run: npm run all
+      - run: git diff --exit-code --ignore-all-space --compact-summary
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          milliseconds: 1000
+          token: ${{ secrets.GITHUB_TOKEN }}
