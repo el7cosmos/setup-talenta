@@ -20,7 +20,7 @@ jobs:
       - run: npm install
       - run: npm audit
       - run: npm run all
-      - run: git diff --exit-code --ignore-all-space --ignore-blank-lines --ignore-space-change
+      - run: '[[ -z "$(git diff --ignore-blank-lines)" ]] && exit 0'
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
