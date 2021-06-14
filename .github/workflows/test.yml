@@ -19,8 +19,13 @@ jobs:
           node-version: 16
       - run: npm install
       - run: npm audit
-      - run: npm run all
+      - run: npm run format-check
+      - run: npm run lint
+      - run: npm run package
       - run: '[[ -z "$(git diff --ignore-blank-lines)" ]] && exit 0'
+      - run: |
+          npx jest --coverage
+          npx codecov
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
